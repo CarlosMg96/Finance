@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SplahScreen extends StatefulWidget {
   const SplahScreen({super.key});
@@ -12,8 +13,13 @@ class _SplahScreenState extends State<SplahScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/login');
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user != null) {
+        print(user.uid);
+        Navigator.pushReplacementNamed(context, '/profile');
+      } else {
+        Navigator.pushReplacementNamed(context, '/login');
+      }
     });
   }
 

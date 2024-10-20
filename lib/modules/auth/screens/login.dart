@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+// import 'firebase_options.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -14,6 +17,12 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    void showSnackBar(String message) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white, // Fondo blanco
       body: Padding(
@@ -58,9 +67,27 @@ class _LoginState extends State<Login> {
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.green,
                 ),
-                onPressed: () {
-                  print('Email: ${_emailController.text}');
-                  print('Password: ${_passwordController.text}');
+                onPressed: () async {
+                  try {
+                    final credential =
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                    );
+                    // showSnackBar("Usuario registrado: ${credential.user?.uid}");
+                    Navigator.pushNamed(context, '/profile');
+                  } on FirebaseAuthException catch (e) {
+                    if (e.code == 'weak-password') {
+                      // showSnackBar(
+                      //     "The password provided is too weak.${e.code}");
+                    } else if (e.code == 'email-already-in-use') {
+                      // showSnackBar(
+                      //     "The account already exists for that email.${e.code}");
+                    }
+                  } catch (e) {
+                    print('Error: $e');
+                    // showSnackBar("Error: $e");
+                  }
                 },
                 child: const Text('Iniciar Sesión'),
               ),
@@ -79,6 +106,7 @@ class _LoginState extends State<Login> {
             OutlinedButton(
               onPressed: () {
                 // ignore: avoid_print
+                Navigator.pushNamed(context, '/register');
                 print('Register');
               },
               style: OutlinedButton.styleFrom(
